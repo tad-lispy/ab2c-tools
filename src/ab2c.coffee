@@ -3,7 +3,7 @@ _       = require "lodash"
 elastic = require "elasticsearch"
 
 es      = new elastic.Client
-  host: 'localhost:9200'
+  host: process.env.ELASTICSEARCH_URL or 'http://localhost:9200'
   # log : 'trace'
 
 search = process.argv[2...].join ' '
@@ -20,7 +20,7 @@ es.search
 
   (error, result) ->
     if error then throw error
-    
+
     console.log """
       #{result.hits.total} hits
 

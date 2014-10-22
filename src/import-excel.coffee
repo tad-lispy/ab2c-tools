@@ -14,11 +14,11 @@ elastic = require "elasticsearch"
 es      = new elastic.Client
   host: process.env.ELASTICSEARCH_URL or 'http://localhost:9200'
   log : "trace"
--  
+
 keys = [
   '_id'
-  'court_date'  
-  'court_sign' 
+  'court_date'
+  'court_sign'
   'court'
   'plaintiffs'
   'defendants'
@@ -27,12 +27,12 @@ keys = [
   'notes'
   'market'
 ]
-get_date = (value) -> 
+get_date = (value) ->
   moment '1900-01-01'
     .add 'days', Math.floor value - 1
     .toDate()
 
-transformations = 
+transformations =
   'court_date'    : get_date
   'register_date' : get_date
 
@@ -42,12 +42,12 @@ async.waterfall [
   (done) -> es.ping requestTimeout: 1000, (error) -> done error
   # TODO: run next steps only if reset command line option is set
   (done) -> es.indices.exists index: 'ab2c', done
-  (exists, status, done) -> 
+  (exists, status, done) ->
     if exists then es.indices.delete index: 'ab2c', done
     else done null
   (msg, status, done) ->
     console.log "creating index"
-    es.indices.create 
+    es.indices.create
       index   : 'ab2c'
       body    :
         mappings:
@@ -62,7 +62,7 @@ async.waterfall [
                 type      : "string"
               defendants:
                 type      : "string"
-              market    : 
+              market    :
                 type      : "string"
               notes     :
                 type      : "string"
@@ -73,13 +73,13 @@ async.waterfall [
                  format   : "dateOptionalTime"
               text      :
                  type     : "string"
-                 analyzer : "polish"
+                 analyzer : "morfologik"
       done
 
   (msg, status, done) ->
     console.log "Index and mapping are set"
     done null
-  (done) -> 
+  (done) ->
     console.log "Parsing excel file"
     excel "./rejestr.xlsx", done
   (data, done) ->
@@ -106,6 +106,3 @@ async.waterfall [
   if error then throw error
   console.log "Fine."
   process.exit 0
-
-
-  
